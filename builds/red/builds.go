@@ -24,7 +24,6 @@ func (build FailedBuildFetcher) Fetch(pipelineName string) ([]atc.Build, error) 
 
 	for _, value := range config.Jobs {
 		job, _, err := team.Job(pipelineName, value.Name)
-
 		if err != nil {
 			return nil, errors.Wrap(err, "Unable to get pipeline config")
 		}
