@@ -9,5 +9,5 @@ const (
 
 
 type Sender interface {
-	Send(red.Build, red.PersonInvestigating) error
+	Send(red.FailedBuildFetcher, red.PersonInvestigating) error
 }

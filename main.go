@@ -3,12 +3,9 @@ package main
 import (
 	"github.com/jessevdk/go-flags"
 	"strings"
-	"fmt"
 	"github.com/DennisDenuto/igrb/multicast/sender"
 	"github.com/concourse/fly/commands"
-	"github.com/concourse/fly/rc"
 	multicast_reader "github.com/DennisDenuto/igrb/multicast/reader"
-	"github.com/DennisDenuto/igrb/builds/red"
 )
 
 const (
@@ -38,5 +35,5 @@ Target = bosh
 Count = 50
 `))
 
-	red.ListBuilds(fly.Target)
+	//red.ListBuilds(fly.Target)
 }
