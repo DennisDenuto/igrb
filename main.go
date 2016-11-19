@@ -58,36 +58,46 @@ Count = 50
 	}
 
 	var wg sync.WaitGroup
-	var pipelines []atc.Pipeline
-	if fly.Pipelines.All {
-		pipelines, err = target.Client().ListPipelines()
-	} else {
-		pipelines, err = target.Team().ListPipelines()
-	}
-
 	var failedBuilds map[string][]atc.Build = make(map[string][]atc.Build)
 
-	for _, p := range pipelines {
-		wg.Add(1)
-		go func(pipeline atc.Pipeline) {
-			defer wg.Done()
+	var pipelines []atc.Pipeline
+	pipelines, err = ListPipelines(fly.Pipelines.All, target)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-			failedBuildsForPipeline, err := red.FailedBuildFetcher{Target: target}.Fetch(pipeline.Name)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			failedBuilds[pipeline.Name] = failedBuildsForPipeline
-		}(p)
+	for _, pipeline := range pipelines {
+		wg.Add(1)
+		go FetchFailedBuilds(pipeline, target, &wg, failedBuilds)
 	}
 	wg.Wait()
 
 	painter := &bitbar.Painter{}
-	for _, failedPipelineBuilda := range failedBuilds {
-		for _, value := range failedPipelineBuilda {
+	for _, failedPipelineBuilds := range failedBuilds {
+		for _, value := range failedPipelineBuilds {
 			painter.AddMainMenuItems(bitbar.JobToString(target.URL(), value))
 		}
 	}
 
 	painter.Print()
+}
+
+func ListPipelines(all bool, target rc.Target) ([]atc.Pipeline, error) {
+	if all {
+		return target.Client().ListPipelines()
+	} else {
+		return target.Team().ListPipelines()
+	}
+}
+
+func FetchFailedBuilds(pipeline atc.Pipeline, target rc.Target, wg *sync.WaitGroup, failedBuilds map[string][]atc.Build) {
+	defer wg.Done()
+
+	failedBuildsForPipeline, err := red.FailedBuildFetcher{Target: target}.Fetch(pipeline.Name)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	failedBuilds[pipeline.Name] = failedBuildsForPipeline
 }
