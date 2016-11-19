@@ -27,6 +27,11 @@ func (build FailedBuildFetcher) Fetch(pipelineName string) ([]atc.Build, error) 
 		if err != nil {
 			return nil, errors.Wrap(err, "Unable to get pipeline config")
 		}
+
+		if job.FinishedBuild == nil {
+			continue
+		}
+
 		switch job.FinishedBuild.Status {
 		case string(atc.StatusFailed): builds = append(builds, *job.FinishedBuild)
 		case string(atc.StatusErrored): builds = append(builds, *job.FinishedBuild)

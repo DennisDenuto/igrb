@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"github.com/concourse/fly/rc"
 	"github.com/DennisDenuto/igrb/ui/bitbar"
+	"sync"
+	"github.com/concourse/atc"
 )
 
 const (
@@ -55,15 +57,36 @@ Count = 50
 		return
 	}
 
-	failedBuilds, err := red.FailedBuildFetcher{Target: target}.Fetch("bosh")
-	if err != nil {
-		fmt.Println(err)
-		return
+	var wg sync.WaitGroup
+	var pipelines []atc.Pipeline
+	if fly.Pipelines.All {
+		pipelines, err = target.Client().ListPipelines()
+	} else {
+		pipelines, err = target.Team().ListPipelines()
 	}
 
+	var failedBuilds map[string][]atc.Build = make(map[string][]atc.Build)
+
+	for _, p := range pipelines {
+		wg.Add(1)
+		go func(pipeline atc.Pipeline) {
+			defer wg.Done()
+
+			failedBuildsForPipeline, err := red.FailedBuildFetcher{Target: target}.Fetch(pipeline.Name)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			failedBuilds[pipeline.Name] = failedBuildsForPipeline
+		}(p)
+	}
+	wg.Wait()
+
 	painter := &bitbar.Painter{}
-	for _, value := range failedBuilds {
-		painter.AddMainMenuItems(bitbar.JobToString(target.URL(), value))
+	for _, failedPipelineBuilda := range failedBuilds {
+		for _, value := range failedPipelineBuilda {
+			painter.AddMainMenuItems(bitbar.JobToString(target.URL(), value))
+		}
 	}
 
 	painter.Print()
