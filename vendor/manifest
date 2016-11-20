@@ -225,6 +225,14 @@
 			"notests": true
 		},
 		{
+			"importpath": "github.com/google/btree",
+			"repository": "https://github.com/google/btree",
+			"vcs": "git",
+			"revision": "925471ac9e2131377a91e1595defec898166fe49",
+			"branch": "master",
+			"notests": true
+		},
+		{
 			"importpath": "github.com/google/go-github/github",
 			"repository": "https://github.com/google/go-github",
 			"vcs": "git",
@@ -379,10 +387,35 @@
 			"notests": true
 		},
 		{
+			"importpath": "github.com/petar/GoLLRB/llrb",
+			"repository": "https://github.com/petar/GoLLRB",
+			"vcs": "git",
+			"revision": "53be0d36a84c2a886ca057d34b6aa4468df9ccb4",
+			"branch": "master",
+			"path": "/llrb",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/peterbourgon/diskv",
+			"repository": "https://github.com/peterbourgon/diskv",
+			"vcs": "git",
+			"revision": "5dfcb07a075adbaaa4094cddfd160b1e1c77a043",
+			"branch": "master",
+			"notests": true
+		},
+		{
 			"importpath": "github.com/peterhellberg/link",
 			"repository": "https://github.com/peterhellberg/link",
 			"vcs": "git",
 			"revision": "d1cebc7ea14a5fc0de7cb4a45acae773161642c6",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/pkg/errors",
+			"repository": "https://github.com/pkg/errors",
+			"vcs": "git",
+			"revision": "248dadf4e9068a0b3e79f02ed0a610d935de5302",
 			"branch": "master",
 			"notests": true
 		},

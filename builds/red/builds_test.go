@@ -140,7 +140,7 @@ var _ = Describe("Builds", func() {
 
 				_, err := build.Fetch(pipelineName)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("Unable to get pipeline config: some stange error"))
+				Expect(err.Error()).To(ContainSubstring("Unable to get pipeline config: some strange error"))
 			})
 		})
 	})
