@@ -6,9 +6,7 @@ import (
 	"os"
 	"encoding/json"
 	"github.com/pkg/errors"
-
 )
-
 
 var DataDir string = fmt.Sprintf("%sigrb-data", os.TempDir())
 
@@ -54,3 +52,13 @@ func (disk DiskPersistor) ReadAndUnmarshal(key string, val interface{}) (error) 
 	return json.Unmarshal(data, val)
 }
 
+func (disk DiskPersistor) ListKeys() ([]string, error) {
+	var allKeys []string
+
+	keys := disk.diskv.Keys(nil)
+	for value := range keys {
+		allKeys = append(allKeys, value)
+	}
+
+	return allKeys, nil
+}

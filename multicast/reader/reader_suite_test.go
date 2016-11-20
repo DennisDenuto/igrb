@@ -1,4 +1,4 @@
-package diskstore_test
+package reader_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -9,11 +9,10 @@ import (
 	"github.com/DennisDenuto/igrb/data/diskstore"
 )
 
-func TestDiskstore(t *testing.T) {
+func TestReader(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Diskstore Suite")
+	RunSpecs(t, "Reader Suite")
 }
-
 
 var _ = BeforeSuite(func() {
 	CleanUpDataDir()

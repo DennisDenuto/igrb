@@ -30,12 +30,12 @@ const (
 	srvAddr = "224.0.0.1:9999"
 )
 
-func main1() {
+func main() {
 	go sender.Ping(srvAddr)
-	multicast_reader.ServeMulticastUDP(srvAddr, multicast_reader.MsgHandler)
+	multicast_reader.NewServeMulticastUDP(srvAddr).ServeMulticastUDP()
 }
 
-func main() {
+func main1() {
 
 	fly := &commands.Fly
 
