@@ -4,12 +4,13 @@ import (
 	. "github.com/DennisDenuto/igrb/multicast/reader"
 
 	. "github.com/onsi/ginkgo"
-	"net"
 	"encoding/json"
 	. "github.com/onsi/gomega"
 	"github.com/DennisDenuto/igrb/data/diskstore"
 	"time"
 	"github.com/DennisDenuto/igrb/multicast"
+	"github.com/DennisDenuto/igrb/multicast/sender"
+	"net"
 )
 
 func SendMulticast(mGroup string, payload string) error {
@@ -28,8 +29,11 @@ var _ = Describe("Reader", func() {
 	Describe("ServeMulticastUDP", func() {
 		Context("A build is taken by a dev", func() {
 			var finish chan bool
+			var multicastSender sender.MulticastSender
 
 			BeforeEach(func() {
+				multicastSender = sender.NewMultiCastSender("224.0.0.1:9999")
+
 				finish = make(chan bool, 1)
 
 				go func() {
@@ -50,11 +54,8 @@ var _ = Describe("Reader", func() {
 					BuildId: "build-id",
 				}
 
-				reqJson, err := json.Marshal(req)
-				Expect(err).ToNot(HaveOccurred())
-
 				Eventually(func() multicast.DevLookingIntoBuild {
-					SendMulticast("224.0.0.1:9999", string(reqJson))
+					multicastSender.SendMulticast(req)
 					resp := multicast.DevLookingIntoBuild{}
 					diskstore.NewDiskPersistor().ReadAndUnmarshal("pipeline_job-name_build-id", &resp)
 					return resp
@@ -70,11 +71,8 @@ var _ = Describe("Reader", func() {
 					BuildId: "321",
 				}
 
-				reqJson, err := json.Marshal(req)
-				Expect(err).ToNot(HaveOccurred())
-
 				Eventually(func() multicast.DevLookingIntoBuild {
-					SendMulticast("224.0.0.1:9999", string(reqJson))
+					multicastSender.SendMulticast(req)
 					resp := multicast.DevLookingIntoBuild{}
 					diskstore.NewDiskPersistor().ReadAndUnmarshal("pipeline:test_foo_job-name_321", &resp)
 					return resp
@@ -94,6 +92,7 @@ var _ = Describe("Reader", func() {
 				Expect(err).ToNot(HaveOccurred())
 
 				allKeys, _ := diskstore.NewDiskPersistor().ListKeys()
+
 				SendMulticast("224.0.0.1:9999", string(reqJson))
 				time.Sleep(2 * time.Second)
 

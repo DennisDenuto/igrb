@@ -1,24 +1,47 @@
 package sender
+
 import (
-	"log"
 	"net"
-	"time"
+	"github.com/DennisDenuto/igrb/multicast"
+	"encoding/json"
+	logger "github.com/Sirupsen/logrus"
 )
 
 const (
-	SrvAddr         = "224.0.0.1:9999"
+	SrvAddr = "224.0.0.1:9999"
 	MaxDatagramSize = 8192
 )
 
+type MulticastSender struct {
+	SrvAddress string
+}
 
-func Ping(a string) {
-	addr, err := net.ResolveUDPAddr("udp", a)
+func NewMultiCastSender(addr string) MulticastSender {
+	return MulticastSender{
+		SrvAddress: addr,
+	}
+}
+
+func (sender MulticastSender) SendMulticast(devLookingIntoBuild multicast.DevLookingIntoBuild) error {
+	addr, err := net.ResolveUDPAddr("udp", sender.SrvAddress)
 	if err != nil {
-		log.Fatal(err)
+		logger.Error(err)
+		return err
 	}
+
 	c, err := net.DialUDP("udp", nil, addr)
-	for {
-		c.Write([]byte("(((((((hello, world\n"))
-		time.Sleep(1 * time.Second)
+	if err != nil {
+		logger.Error(err)
+		return err
 	}
+
+	devJson, err := json.Marshal(devLookingIntoBuild)
+	if err != nil {
+		logger.Error(err)
+		return err
+	}
+
+	c.Write(devJson)
+
+	return nil
 }
