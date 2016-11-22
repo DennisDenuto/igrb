@@ -5,11 +5,11 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	"net"
-	"github.com/DennisDenuto/igrb/multicast/types"
 	"encoding/json"
 	. "github.com/onsi/gomega"
 	"github.com/DennisDenuto/igrb/data/diskstore"
 	"time"
+	"github.com/DennisDenuto/igrb/multicast"
 )
 
 func SendMulticast(mGroup string, payload string) error {
@@ -43,7 +43,7 @@ var _ = Describe("Reader", func() {
 			})
 
 			It("Should correctly parse and update the store with the info", func() {
-				req := types.DevLookingIntoBuild{
+				req := multicast.DevLookingIntoBuild{
 					DevName: "dev-name",
 					PipelineName: "pipeline",
 					JobName: "job-name",
@@ -53,9 +53,9 @@ var _ = Describe("Reader", func() {
 				reqJson, err := json.Marshal(req)
 				Expect(err).ToNot(HaveOccurred())
 
-				Eventually(func() types.DevLookingIntoBuild {
+				Eventually(func() multicast.DevLookingIntoBuild {
 					SendMulticast("224.0.0.1:9999", string(reqJson))
-					resp := types.DevLookingIntoBuild{}
+					resp := multicast.DevLookingIntoBuild{}
 					diskstore.NewDiskPersistor().ReadAndUnmarshal("pipeline_job-name_build-id", &resp)
 					return resp
 				}, 5 * time.Second, 1 * time.Second).Should(Equal(req))
@@ -63,7 +63,7 @@ var _ = Describe("Reader", func() {
 			})
 
 			It("Should correctly escape non-file characters from pipeline/job/build id", func() {
-				req := types.DevLookingIntoBuild{
+				req := multicast.DevLookingIntoBuild{
 					DevName: "dev-name:abc",
 					PipelineName: "pipeline:test/foo",
 					JobName: "job-name",
@@ -73,9 +73,9 @@ var _ = Describe("Reader", func() {
 				reqJson, err := json.Marshal(req)
 				Expect(err).ToNot(HaveOccurred())
 
-				Eventually(func() types.DevLookingIntoBuild {
+				Eventually(func() multicast.DevLookingIntoBuild {
 					SendMulticast("224.0.0.1:9999", string(reqJson))
-					resp := types.DevLookingIntoBuild{}
+					resp := multicast.DevLookingIntoBuild{}
 					diskstore.NewDiskPersistor().ReadAndUnmarshal("pipeline:test_foo_job-name_321", &resp)
 					return resp
 				}, 5 * time.Second, 1 * time.Second).Should(Equal(req))

@@ -5,6 +5,11 @@ import (
 	"time"
 )
 
+const (
+	SrvAddr         = "224.0.0.1:9999"
+	MaxDatagramSize = 8192
+)
+
 
 func Ping(a string) {
 	addr, err := net.ResolveUDPAddr("udp", a)

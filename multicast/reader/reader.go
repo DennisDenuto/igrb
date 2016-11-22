@@ -6,9 +6,9 @@ import (
 	"log"
 	"github.com/DennisDenuto/igrb/data/diskstore"
 	"encoding/json"
-	"github.com/DennisDenuto/igrb/multicast/types"
 	"github.com/pkg/errors"
 	logger "github.com/Sirupsen/logrus"
+	"github.com/DennisDenuto/igrb/multicast/sender"
 )
 
 type MulticastReceiver struct {
@@ -24,7 +24,7 @@ func NewServeMulticastUDP(srvAddress string) MulticastReceiver {
 }
 
 func MsgHandler(src *net.UDPAddr, n int, b []byte) {
-	devReq := types.DevLookingIntoBuild{}
+	devReq := multicast.DevLookingIntoBuild{}
 	err := json.Unmarshal(b[:n], &devReq)
 	if err != nil {
 		logger.Error(errors.Wrap(err, "Unable to parse multicast request"))
@@ -44,13 +44,13 @@ func (receiver MulticastReceiver) ServeMulticastUDP(finish <-chan bool) {
 		log.Fatal(err)
 	}
 	l, err := net.ListenMulticastUDP("udp", nil, addr)
-	l.SetReadBuffer(multicast.MaxDatagramSize)
+	l.SetReadBuffer(sender.MaxDatagramSize)
 	for {
 		select {
 		case <-finish:
 			return
 		default:
-			b := make([]byte, multicast.MaxDatagramSize)
+			b := make([]byte, sender.MaxDatagramSize)
 			n, src, err := l.ReadFromUDP(b)
 			if err != nil {
 				log.Fatal("ReadFromUDP failed:", err)
