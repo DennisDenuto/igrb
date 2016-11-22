@@ -7,6 +7,8 @@ import (
 	"github.com/DennisDenuto/igrb/data/diskstore"
 	"encoding/json"
 	"github.com/DennisDenuto/igrb/multicast/types"
+	"github.com/pkg/errors"
+	logger "github.com/Sirupsen/logrus"
 )
 
 type MulticastReceiver struct {
@@ -23,9 +25,17 @@ func NewServeMulticastUDP(srvAddress string) MulticastReceiver {
 
 func MsgHandler(src *net.UDPAddr, n int, b []byte) {
 	devReq := types.DevLookingIntoBuild{}
-	json.Unmarshal(b[:n], &devReq)
+	err := json.Unmarshal(b[:n], &devReq)
+	if err != nil {
+		logger.Error(errors.Wrap(err, "Unable to parse multicast request"))
+	}
 
-	diskstore.NewDiskPersistor().Save("pipeline_job_build-id", devReq)
+	if devReq.PipelineName == "" || devReq.JobName == "" || devReq.BuildId == "" {
+		logger.Info("Skipping devRequest due to missing fields")
+		return
+	}
+
+	diskstore.NewDiskPersistor().Save(devReq.Key(), devReq)
 }
 
 func (receiver MulticastReceiver) ServeMulticastUDP(finish <-chan bool) {
