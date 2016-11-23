@@ -6,9 +6,10 @@ import (
 	"os"
 	"encoding/json"
 	"github.com/pkg/errors"
+	logger "github.com/Sirupsen/logrus"
 )
 
-var DataDir string = fmt.Sprintf("%sigrb-data", os.TempDir())
+var DataDir string = fmt.Sprintf("%s/igrb-data", os.TempDir())
 
 type DiskPersistor struct {
 	diskv *diskv.Diskv
@@ -19,6 +20,7 @@ func NewDiskPersistor() DiskPersistor {
 		return []string{}
 	}
 
+	logger.Debugf("Init db in %s", DataDir)
 	diskV := diskv.New(diskv.Options{
 		BasePath:     DataDir,
 		Transform:    flatTransform,

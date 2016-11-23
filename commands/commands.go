@@ -34,8 +34,8 @@ type MulticastSendCommand struct {
 type StatusCommand struct{}
 
 func (MulticastListenCommand) Execute(args []string) error {
-	var finish chan bool
-	multicast_reader.NewServeMulticastUDP(srvAddr).ServeMulticastUDP(finish)
+
+	multicast_reader.NewServeMulticastUDP(srvAddr).ServeMulticastUDP(nil)
 
 	return nil
 }

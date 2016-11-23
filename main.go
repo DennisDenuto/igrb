@@ -15,7 +15,16 @@ package main
 import (
 	"github.com/jessevdk/go-flags"
 	"github.com/DennisDenuto/igrb/commands"
+	"os"
+	logger "github.com/Sirupsen/logrus"
 )
+
+
+func init() {
+	logger.SetFormatter(&logger.JSONFormatter{})
+	logger.SetOutput(os.Stderr)
+	logger.SetLevel(logger.DebugLevel)
+}
 
 
 func main() {

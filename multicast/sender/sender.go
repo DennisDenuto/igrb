@@ -42,6 +42,7 @@ func (sender MulticastSender) SendMulticast(devLookingIntoBuild multicast.DevLoo
 	}
 
 	c.Write(devJson)
+	logger.Debugf("Sent %s", devJson)
 
 	return nil
 }

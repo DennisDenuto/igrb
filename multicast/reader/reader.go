@@ -35,6 +35,7 @@ func MsgHandler(src *net.UDPAddr, n int, b []byte) {
 		return
 	}
 
+	logger.Debugf("Saving %s", devReq)
 	diskstore.NewDiskPersistor().Save(devReq.Key(), devReq)
 }
 
@@ -44,6 +45,7 @@ func (receiver MulticastReceiver) ServeMulticastUDP(finish <-chan bool) {
 		log.Fatal(err)
 	}
 	l, err := net.ListenMulticastUDP("udp", nil, addr)
+	logger.Debugf("Listening on %s", addr)
 	l.SetReadBuffer(sender.MaxDatagramSize)
 	for {
 		select {
