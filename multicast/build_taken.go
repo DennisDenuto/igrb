@@ -10,6 +10,7 @@ type DevLookingIntoBuild struct {
 	PipelineName string `json:"pipeline_name"`
 	JobName      string `json:"job_name"`
 	BuildId      string `json:"build_id"`
+	Ignore       bool `json:"ignore"`
 }
 
 func (devReq DevLookingIntoBuild) Key() string {

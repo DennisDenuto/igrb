@@ -10,8 +10,6 @@ type FailedBuildFetcher struct {
 	Target rc.Target
 }
 
-type PersonInvestigating struct {
-}
 
 func (build FailedBuildFetcher) Fetch(pipelineName string) ([]atc.Build, error) {
 	team := build.Target.Team()

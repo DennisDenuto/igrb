@@ -13,6 +13,7 @@ import (
 	"github.com/DennisDenuto/igrb/builds/red"
 	"github.com/DennisDenuto/igrb/multicast/sender"
 	"github.com/DennisDenuto/igrb/multicast"
+	"github.com/DennisDenuto/igrb/data/diskstore"
 )
 
 const (
@@ -23,6 +24,7 @@ type ActionOpts struct {
 	MulticastListen MulticastListenCommand `command:"listen"`
 	MulticastSend   MulticastSendCommand `command:"send"`
 	Status          StatusCommand `command:"status"`
+	Ignore          IgnoreCommand `command:"ignore"`
 }
 
 type MulticastListenCommand struct{}
@@ -32,9 +34,11 @@ type MulticastSendCommand struct {
 }
 
 type StatusCommand struct{}
+type IgnoreCommand struct{
+	Arg multicast.DevLookingIntoBuild `positional-args:"yes" required:"4"`
+}
 
 func (MulticastListenCommand) Execute(args []string) error {
-
 	multicast_reader.NewServeMulticastUDP(srvAddr).ServeMulticastUDP(nil)
 
 	return nil
@@ -43,6 +47,12 @@ func (MulticastListenCommand) Execute(args []string) error {
 func (send MulticastSendCommand) Execute(args []string) error {
 	return sender.NewMultiCastSender(srvAddr).SendMulticast(send.Arg)
 }
+
+func (ignore IgnoreCommand) Execute(args []string) error {
+	ignore.Arg.Ignore = true
+	return diskstore.NewDiskPersistor().Save(ignore.Arg.Key(), ignore.Arg)
+}
+
 
 func (StatusCommand) Execute(args []string) error {
 	fly := &commands.Fly
