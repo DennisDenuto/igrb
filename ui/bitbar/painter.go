@@ -16,8 +16,9 @@ func (p *Painter) AddMainMenuItems(item string) {
 
 func JobToString(targetUrl string, build atc.Build) string {
 	timeElapsed := time.Now().Sub(time.Unix(build.EndTime, 0))
+	command := fmt.Sprintf("bash=igrb param1=send param2=%s param3=a param4=b param5=c terminal=false", "dev-name", build.PipelineName, build.JobName, build.ID)
 	return fmt.Sprintf(`%s/%s %s Time Elapsed: %s | href=%s color=red
-I will fix it | alternate=true bash=/usr/bin/say param1=test terminal=false`, build.PipelineName, build.JobName, build.Status, timeElapsed, targetUrl + build.URL)
+I will fix it | alternate=true %s`, build.PipelineName, build.JobName, build.Status, timeElapsed, targetUrl + build.URL, command)
 }
 
 func (p *Painter) Print() {
