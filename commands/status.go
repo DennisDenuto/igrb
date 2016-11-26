@@ -13,7 +13,11 @@ import (
 	"github.com/DennisDenuto/igrb/data/diskstore"
 	"github.com/DennisDenuto/igrb/multicast"
 	"strconv"
+	"time"
+	"github.com/pkg/errors"
 )
+
+const SUMMARY_KEY = "summary"
 
 func (StatusCommand) Execute(args []string) error {
 	fly := &commands.Fly
@@ -53,11 +57,28 @@ Count = 50
 	}
 	wg.Wait()
 
+	err = SaveFailedBuildsSummary(target.URL(), failedBuilds)
+	if err != nil {
+		fmt.Println(err)
+		return errors.Wrap(err, "Unable to save summary of failed builds")
+	}
+
 	painter := &bitbar.Painter{}
+
 	AddMenuItemsToPainter(target.URL(), failedBuilds, painter)
 	painter.Print()
 
 	return nil
+}
+
+func SaveFailedBuildsSummary(url string, failedBuilds map[string][]atc.Build) error {
+	summary := FailedBuildsSummary{
+		URL: url,
+		FailedBuilds: failedBuilds,
+		CreatedAt: time.Now(),
+	}
+
+	return diskstore.NewDiskPersistor().Save(SUMMARY_KEY, summary)
 }
 
 func AddMenuItemsToPainter(url string, failedBuilds map[string][]atc.Build, painter *bitbar.Painter) {

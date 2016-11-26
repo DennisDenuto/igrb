@@ -10,18 +10,21 @@ import (
 	"github.com/DennisDenuto/igrb/data/diskstore"
 	"github.com/DennisDenuto/igrb/multicast"
 	"os"
+	"time"
 )
 
 var _ = Describe("Status", func() {
+
+	BeforeEach(func() {
+		err := os.RemoveAll(diskstore.DataDir)
+		Expect(err).ToNot(HaveOccurred())
+	})
 
 	Describe("AddMenuItemsToPainter", func() {
 		Context("red builds", func() {
 			var failedBuilds map[string][]atc.Build = make(map[string][]atc.Build)
 
 			BeforeEach(func() {
-				err := os.RemoveAll(diskstore.DataDir)
-				Expect(err).ToNot(HaveOccurred())
-
 				failedBuilds["pipeline-1"] = []atc.Build{
 					{ID: 1, JobName: "job-1", PipelineName: "pipeline-1"},
 					{ID: 2, JobName: "job-2", PipelineName: "pipeline-1"},
@@ -60,5 +63,34 @@ var _ = Describe("Status", func() {
 
 			})
 		})
+	})
+
+	Describe("SaveFailedBuildsSummary", func() {
+		var failedBuilds map[string][]atc.Build = make(map[string][]atc.Build)
+
+		BeforeEach(func() {
+			failedBuilds["pipeline-1"] = []atc.Build{
+				{ID: 1, JobName: "job-1", PipelineName: "pipeline-1"},
+			}
+			failedBuilds["pipeline-2"] = []atc.Build{
+				{ID: 1, JobName: "job-1", PipelineName: "pipeline-2"},
+			}
+		})
+
+		Context("failed builds returned", func() {
+			It("Should persist to disk", func() {
+				err := SaveFailedBuildsSummary("url", failedBuilds)
+				Expect(err).ToNot(HaveOccurred())
+
+				summary := &FailedBuildsSummary{}
+				err = diskstore.NewDiskPersistor().ReadAndUnmarshal("summary", summary)
+				Expect(err).ToNot(HaveOccurred())
+
+				Expect(summary.URL).To(Equal("url"))
+				Expect(summary.FailedBuilds).To(HaveLen(2))
+				Expect(summary.CreatedAt).To(BeTemporally("~", time.Now(), 5 * time.Second))
+			})
+		})
+
 	})
 })
