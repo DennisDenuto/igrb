@@ -20,8 +20,8 @@ func (p *Painter) AddMainMenuItems(item string) {
 func JobToString(targetUrl string, build atc.Build) string {
 	timeElapsed := time.Now().Sub(time.Unix(build.EndTime, 0))
 
-	commandToInvestigate := fmt.Sprintf("bash=igrb param1=send param2=%s param3=%s param4=%s param5=%d terminal=false", "dev-name", build.PipelineName, build.JobName, build.ID)
-	commandToIgnore := fmt.Sprintf("bash=igrb param1=ignore param2=%s param3=%s param4=%s param5=%d terminal=false", "_", build.PipelineName, build.JobName, build.ID)
+	commandToInvestigate := fmt.Sprintf("bash=/usr/local/bin/igrb param1=send param2=%s param3=%s param4=%s param5=%d terminal=false", "dev-name", build.PipelineName, build.JobName, build.ID)
+	commandToIgnore := fmt.Sprintf("bash=/usr/local/bin/igrb param1=ignore param2=%s param3=%s param4=%s param5=%d terminal=false", "_", build.PipelineName, build.JobName, build.ID)
 
 	var icon string = ":exclamation:"
 	buildTakenByDev := &multicast.DevLookingIntoBuild{}
