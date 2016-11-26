@@ -34,21 +34,44 @@ Target = bosh
 [builds]
 Count = 50
 `))
-
 	target, err := rc.LoadTarget(fly.Target)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
 
-	var wg sync.WaitGroup
+	var failedBuilds map[string][]atc.Build
+
+	summary := &FailedBuildsSummary{}
+	diskstore.NewDiskPersistor().ReadAndUnmarshal(SUMMARY_KEY, summary)
+
+	if time.Since(summary.CreatedAt) > 30 * time.Second {
+		failedBuilds, err = fetchFailedBuildsRemotely(fly, target)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+	} else {
+		failedBuilds = summary.FailedBuilds
+	}
+
+	painter := &bitbar.Painter{}
+
+	AddMenuItemsToPainter(target.URL(), failedBuilds, painter)
+	painter.Print()
+
+	return nil
+}
+
+func fetchFailedBuildsRemotely(fly *commands.FlyCommand, target rc.Target) (map[string][]atc.Build, error) {
 	var failedBuilds map[string][]atc.Build = make(map[string][]atc.Build)
 
+	var wg sync.WaitGroup
 	var pipelines []atc.Pipeline
-	pipelines, err = ListPipelines(fly.Pipelines.All, target)
+	pipelines, err := ListPipelines(fly.Pipelines.All, target)
 	if err != nil {
 		fmt.Println(err)
-		return err
+		return nil, err
 	}
 
 	for _, pipeline := range pipelines {
@@ -60,17 +83,12 @@ Count = 50
 	err = SaveFailedBuildsSummary(target.URL(), failedBuilds)
 	if err != nil {
 		fmt.Println(err)
-		return errors.Wrap(err, "Unable to save summary of failed builds")
+		return nil, errors.Wrap(err, "Unable to save summary of failed builds")
 	}
 
-	painter := &bitbar.Painter{}
+	return failedBuilds, nil
 
-	AddMenuItemsToPainter(target.URL(), failedBuilds, painter)
-	painter.Print()
-
-	return nil
 }
-
 func SaveFailedBuildsSummary(url string, failedBuilds map[string][]atc.Build) error {
 	summary := FailedBuildsSummary{
 		URL: url,
