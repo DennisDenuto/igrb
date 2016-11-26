@@ -17,8 +17,8 @@ func (p *Painter) AddMainMenuItems(item string) {
 func JobToString(targetUrl string, build atc.Build) string {
 	timeElapsed := time.Now().Sub(time.Unix(build.EndTime, 0))
 
-	commandToInvestigate := fmt.Sprintf("bash=igrb param1=send param2=%s param3=&s param4=%s param5=%s param6=%s terminal=false", "dev-name", build.PipelineName, build.JobName, build.ID, false)
-	commandToIgnore := fmt.Sprintf("bash=igrb param1=ignore param2=%s param3=&s param4=%s param5=%s param6=%s terminal=false", "_", build.PipelineName, build.JobName, build.ID, true)
+	commandToInvestigate := fmt.Sprintf("bash=igrb param1=send param2=%s param3=%s param4=%s param5=%d param6=%t terminal=false", "dev-name", build.PipelineName, build.JobName, build.ID, false)
+	commandToIgnore := fmt.Sprintf("bash=igrb param1=ignore param2=%s param3=%s param4=%s param5=%d param6=%t terminal=false", "_", build.PipelineName, build.JobName, build.ID, true)
 
 	return fmt.Sprintf(`---
 :exclamation: %s/%s %s | href=%s

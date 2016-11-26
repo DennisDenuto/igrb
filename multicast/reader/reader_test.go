@@ -51,30 +51,13 @@ var _ = Describe("Reader", func() {
 					DevName: "dev-name",
 					PipelineName: "pipeline",
 					JobName: "job-name",
-					BuildId: "build-id",
+					ID: 123,
 				}
 
 				Eventually(func() multicast.DevLookingIntoBuild {
 					multicastSender.SendMulticast(req)
 					resp := multicast.DevLookingIntoBuild{}
-					diskstore.NewDiskPersistor().ReadAndUnmarshal("pipeline_job-name_build-id", &resp)
-					return resp
-				}, 5 * time.Second, 1 * time.Second).Should(Equal(req))
-
-			})
-
-			It("Should correctly escape non-file characters from pipeline/job/build id", func() {
-				req := multicast.DevLookingIntoBuild{
-					DevName: "dev-name:abc",
-					PipelineName: "pipeline:test/foo",
-					JobName: "job-name",
-					BuildId: "321",
-				}
-
-				Eventually(func() multicast.DevLookingIntoBuild {
-					multicastSender.SendMulticast(req)
-					resp := multicast.DevLookingIntoBuild{}
-					diskstore.NewDiskPersistor().ReadAndUnmarshal("pipeline:test_foo_job-name_321", &resp)
+					diskstore.NewDiskPersistor().ReadAndUnmarshal(req.Key(), &resp)
 					return resp
 				}, 5 * time.Second, 1 * time.Second).Should(Equal(req))
 

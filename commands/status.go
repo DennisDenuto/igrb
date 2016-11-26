@@ -10,6 +10,9 @@ import (
 	"github.com/concourse/fly/commands"
 	"strings"
 	"github.com/jessevdk/go-flags"
+	"github.com/DennisDenuto/igrb/data/diskstore"
+	"github.com/DennisDenuto/igrb/multicast"
+	"strconv"
 )
 
 func (StatusCommand) Execute(args []string) error {
@@ -51,14 +54,28 @@ Count = 50
 	wg.Wait()
 
 	painter := &bitbar.Painter{}
+	AddMenuItemsToPainter(target.URL(), failedBuilds, painter)
+	painter.Print()
+
+	return nil
+}
+
+func AddMenuItemsToPainter(url string, failedBuilds map[string][]atc.Build, painter *bitbar.Painter) {
 	for _, failedPipelineBuilds := range failedBuilds {
 		for _, value := range failedPipelineBuilds {
-			painter.AddMainMenuItems(bitbar.JobToString(target.URL(), value))
+			if buildIgnored(value) {
+				continue
+			}
+			painter.AddMainMenuItems(bitbar.JobToString(url, value))
 		}
 	}
+}
 
-	painter.Print()
-	return nil
+func buildIgnored(build atc.Build) bool {
+	buildReq := &multicast.DevLookingIntoBuild{}
+	diskstore.NewDiskPersistor().ReadAndUnmarshal(strconv.Itoa(build.ID), buildReq)
+
+	return buildReq.Ignore
 }
 
 func ListPipelines(all bool, target rc.Target) ([]atc.Pipeline, error) {

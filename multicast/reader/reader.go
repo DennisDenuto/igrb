@@ -30,7 +30,7 @@ func MsgHandler(src *net.UDPAddr, n int, b []byte) {
 		logger.Error(errors.Wrap(err, "Unable to parse multicast request"))
 	}
 
-	if devReq.PipelineName == "" || devReq.JobName == "" || devReq.BuildId == "" {
+	if devReq.PipelineName == "" || devReq.JobName == "" {
 		logger.Info("Skipping devRequest due to missing fields")
 		return
 	}
