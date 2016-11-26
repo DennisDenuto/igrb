@@ -15,17 +15,25 @@ package main
 import (
 	"github.com/jessevdk/go-flags"
 	"github.com/DennisDenuto/igrb/commands"
-	"os"
 	logger "github.com/Sirupsen/logrus"
+	"os"
 )
-
 
 func init() {
 	logger.SetFormatter(&logger.JSONFormatter{})
-	logger.SetOutput(os.Stderr)
+	var f *os.File
+	var err error
+	if f, err = os.OpenFile("/tmp/igrb.log", os.O_RDWR | os.O_CREATE | os.O_APPEND, 750); err != nil {
+		logger.Error("create log failed", err)
+		return
+	}
+	logger.SetOutput(f)
+	defer func(f *os.File) {
+		f.Sync()
+	}(f)
+
 	logger.SetLevel(logger.DebugLevel)
 }
-
 
 func main() {
 	actionOpts := commands.ActionOpts{}
