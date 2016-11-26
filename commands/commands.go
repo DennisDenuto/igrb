@@ -21,10 +21,10 @@ type ActionOpts struct {
 type MulticastListenCommand struct{}
 type StatusCommand struct{}
 type MulticastSendCommand struct {
-	Arg multicast.DevLookingIntoBuild `positional-args:"yes" required:"4"`
+	Arg multicast.DevLookingIntoBuild `positional-args:"yes"`
 }
 type IgnoreCommand struct{
-	Arg multicast.DevLookingIntoBuild `positional-args:"yes" required:"4"`
+	Arg multicast.DevLookingIntoBuild `positional-args:"yes"`
 }
 
 func (MulticastListenCommand) Execute(args []string) error {
