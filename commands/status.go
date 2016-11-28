@@ -7,92 +7,30 @@ import (
 	"github.com/concourse/atc"
 	"sync"
 	"github.com/DennisDenuto/igrb/builds/red"
-	"github.com/concourse/fly/commands"
-	"strings"
-	"github.com/jessevdk/go-flags"
 	"github.com/DennisDenuto/igrb/data/diskstore"
 	"github.com/DennisDenuto/igrb/multicast"
 	"strconv"
 	"time"
-	"github.com/pkg/errors"
 )
 
 const SUMMARY_KEY = "summary"
 
 func (StatusCommand) Execute(args []string) error {
-	if len(args) == 0 {
-		return errors.New("Concourse target not provided as an arg")
-	}
-	fly := &commands.Fly
-
-	parser := flags.NewParser(fly, flags.HelpFlag | flags.PassDoubleDash)
-	parser.NamespaceDelimiter = "-"
-
-	iniParser := flags.NewIniParser(parser)
-	iniParser.Parse(strings.NewReader(fmt.Sprintf(`
-[Application Options]
-; Concourse target name
-Target = %s
-
-[builds]
-Count = 50
-`, args[0])))
-
-	target, err := rc.LoadTarget(fly.Target)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-
 	var failedBuilds map[string][]atc.Build
 
 	summary := &FailedBuildsSummary{}
 	diskstore.NewDiskPersistor().ReadAndUnmarshal(SUMMARY_KEY, summary)
-
-	if time.Since(summary.CreatedAt) > 30 * time.Second {
-		failedBuilds, err = fetchFailedBuildsRemotely(fly, target)
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
-	} else {
-		failedBuilds = summary.FailedBuilds
-	}
+	failedBuilds = summary.FailedBuilds
 
 	painter := &bitbar.Painter{}
 
-	AddMenuItemsToPainter(target.URL(), failedBuilds, painter)
+	AddMenuItemsToPainter(summary.URL, failedBuilds, painter)
 	painter.Print()
 
 	return nil
 }
 
-func fetchFailedBuildsRemotely(fly *commands.FlyCommand, target rc.Target) (map[string][]atc.Build, error) {
-	var failedBuilds map[string][]atc.Build = make(map[string][]atc.Build)
 
-	var wg sync.WaitGroup
-	var pipelines []atc.Pipeline
-	pipelines, err := ListPipelines(fly.Pipelines.All, target)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-
-	for _, pipeline := range pipelines {
-		wg.Add(1)
-		go FetchFailedBuilds(pipeline, target, &wg, failedBuilds)
-	}
-	wg.Wait()
-
-	err = SaveFailedBuildsSummary(target.URL(), failedBuilds)
-	if err != nil {
-		fmt.Println(err)
-		return nil, errors.Wrap(err, "Unable to save summary of failed builds")
-	}
-
-	return failedBuilds, nil
-
-}
 func SaveFailedBuildsSummary(url string, failedBuilds map[string][]atc.Build) error {
 	summary := FailedBuildsSummary{
 		URL: url,
