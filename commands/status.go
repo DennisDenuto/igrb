@@ -20,20 +20,24 @@ import (
 const SUMMARY_KEY = "summary"
 
 func (StatusCommand) Execute(args []string) error {
+	if len(args) == 0 {
+		return errors.New("Concourse target not provided as an arg")
+	}
 	fly := &commands.Fly
 
 	parser := flags.NewParser(fly, flags.HelpFlag | flags.PassDoubleDash)
 	parser.NamespaceDelimiter = "-"
 
 	iniParser := flags.NewIniParser(parser)
-	iniParser.Parse(strings.NewReader(`
+	iniParser.Parse(strings.NewReader(fmt.Sprintf(`
 [Application Options]
 ; Concourse target name
-Target = bosh
+Target = %s
 
 [builds]
 Count = 50
-`))
+`, args[0])))
+
 	target, err := rc.LoadTarget(fly.Target)
 	if err != nil {
 		fmt.Println(err)
