@@ -198,6 +198,14 @@
 			"notests": true
 		},
 		{
+			"importpath": "github.com/git-duet/git-duet",
+			"repository": "https://github.com/git-duet/git-duet",
+			"vcs": "git",
+			"revision": "b3d5284745390dda853b0c77daef5c1658a780ec",
+			"branch": "master",
+			"notests": true
+		},
+		{
 			"importpath": "github.com/golang/glog",
 			"repository": "https://github.com/golang/glog",
 			"vcs": "git",
