@@ -13,17 +13,18 @@ package main
 //
 
 import (
-	"github.com/jessevdk/go-flags"
+	"os"
+
 	"github.com/DennisDenuto/igrb/commands"
 	logger "github.com/Sirupsen/logrus"
-	"os"
+	"github.com/jessevdk/go-flags"
 )
 
 func init() {
 	logger.SetFormatter(&logger.JSONFormatter{})
 	var f *os.File
 	var err error
-	if f, err = os.OpenFile("/tmp/igrb.log", os.O_RDWR | os.O_CREATE | os.O_APPEND, 750); err != nil {
+	if f, err = os.OpenFile("/tmp/igrb.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0750); err != nil {
 		logger.Error("create log failed", err)
 		return
 	}
