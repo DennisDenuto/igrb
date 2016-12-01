@@ -9,7 +9,7 @@ igrb auto discovers peers on the network using multicast.
 * Install go 1.7
 * Install bitbar (`brew install bitbar`)
 * Install igrb (`go install github.com/DennisDenuto/igrb`)
-* Add a script like the following to `~/.bitbar/` and make it executable:
+* Add a script like the following to `~/.bitbar/igrb.10s.sh` and make it executable:
 
   ```sh
 #!/bin/bash
@@ -22,4 +22,16 @@ fi
   ```
 
   
+# Configure the refresh time
+
+The refresh time is in the filename of the plugin, following this format:
+
+{name}.{time}.{ext}
+name - The name of the file
+time - The refresh rate (see below)
+ext - The file extension
+For example:
+
+igrb.10s.sh would refresh every 10 seconds.
+
 ** Since the bitbar protocol is text-based, the bitbar-igrb plugin can be tested in the terminal. Just execute the script in `~/.bitbar/` in a terminal window.
