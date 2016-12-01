@@ -11,6 +11,7 @@ import (
 	"github.com/DennisDenuto/igrb/multicast"
 	"strconv"
 	"time"
+	"sort"
 )
 
 const SUMMARY_KEY = "summary"
@@ -30,7 +31,6 @@ func (StatusCommand) Execute(args []string) error {
 	return nil
 }
 
-
 func SaveFailedBuildsSummary(url string, failedBuilds map[string][]atc.Build) error {
 	summary := FailedBuildsSummary{
 		URL: url,
@@ -42,13 +42,20 @@ func SaveFailedBuildsSummary(url string, failedBuilds map[string][]atc.Build) er
 }
 
 func AddMenuItemsToPainter(url string, failedBuilds map[string][]atc.Build, painter *bitbar.Painter) {
+	var failedBuildsNotIgnored []atc.Build
+
 	for _, failedPipelineBuilds := range failedBuilds {
 		for _, value := range failedPipelineBuilds {
 			if buildIgnored(value) {
 				continue
 			}
-			painter.AddMainMenuItems(bitbar.JobToString(url, value))
+			failedBuildsNotIgnored = append(failedBuildsNotIgnored, value)
 		}
+	}
+
+	sort.Sort(atc.Builds(failedBuildsNotIgnored))
+	for _, value := range failedBuildsNotIgnored {
+		painter.AddMainMenuItems(bitbar.JobToString(url, value))
 	}
 }
 

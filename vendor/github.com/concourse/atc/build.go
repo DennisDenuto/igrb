@@ -25,6 +25,11 @@ type Build struct {
 	ReapTime     int64  `json:"reap_time,omitempty"`
 }
 
+type Builds []Build
+func (a Builds) Len() int           { return len(a) }
+func (a Builds) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a Builds) Less(i, j int) bool { return a[i].EndTime < a[j].EndTime }
+
 func (b Build) IsRunning() bool {
 	switch BuildStatus(b.Status) {
 	case StatusPending, StatusStarted:
