@@ -15,6 +15,7 @@ import (
 	"sync"
 	"github.com/pkg/errors"
 	logger "github.com/Sirupsen/logrus"
+	"strconv"
 )
 
 const (
@@ -35,6 +36,61 @@ type MulticastSendCommand struct {
 }
 type IgnoreCommand struct {
 	Arg multicast.DevLookingIntoBuild `positional-args:"yes"`
+}
+
+func (MulticastListenCommand) Execute(args []string) error {
+	if len(args) == 0 {
+		return errors.New("Missing concourse target argument")
+	}
+	go func() {
+		for {
+			err := updatedFailedBuildSummary(args[0])
+			if err != nil {
+				logger.Error(errors.Wrap(err, "Unable to update failed build summary"))
+			}
+
+			err = broadcastBuilds()
+			if err != nil {
+				logger.Error(errors.Wrap(err, "Unable to broadcast builds"))
+			}
+
+			time.Sleep(10 * time.Second)
+		}
+	}()
+
+	multicast_reader.NewServeMulticastUDP(srvAddr).ServeMulticastUDP(nil)
+	return nil
+}
+
+func (send MulticastSendCommand) Execute(args []string) error {
+	return sender.NewMultiCastSender(srvAddr).SendMulticast(send.Arg)
+}
+
+func (ignore IgnoreCommand) Execute(args []string) error {
+	ignore.Arg.Ignore = true
+	return diskstore.NewDiskPersistor().Save(ignore.Arg.Key(), ignore.Arg)
+}
+
+func broadcastBuilds() error {
+	summary := &FailedBuildsSummary{}
+	err := diskstore.NewDiskPersistor().ReadAndUnmarshal(SUMMARY_KEY, summary)
+
+	if err != nil {
+		return err
+	}
+
+	for _, failedBuilds := range summary.FailedBuilds {
+		for _, failedBuild := range failedBuilds {
+			buildReq := &multicast.DevLookingIntoBuild{}
+			diskstore.NewDiskPersistor().ReadAndUnmarshal(strconv.Itoa(failedBuild.ID), buildReq)
+			if buildReq.DevName != "" {
+				logger.Debugf("broadcasting buildreq %v", *buildReq)
+				sender.NewMultiCastSender(srvAddr).SendMulticast(*buildReq)
+			}
+		}
+	}
+
+	return nil
 }
 
 func updatedFailedBuildSummary(concourseTarget string) error {
@@ -61,33 +117,6 @@ Count = 50
 
 	_, err = fetchFailedBuildsRemotely(fly, target)
 	return err
-}
-
-func (MulticastListenCommand) Execute(args []string) error {
-	if len(args) == 0 {
-		return errors.New("Missing concourse target argument")
-	}
-	go func() {
-		for {
-			err := updatedFailedBuildSummary(args[0])
-			if err != nil {
-				logger.Error(errors.Wrap(err, "Unable to update failed build summary"))
-			}
-			time.Sleep(10 * time.Second)
-		}
-	}()
-
-	multicast_reader.NewServeMulticastUDP(srvAddr).ServeMulticastUDP(nil)
-	return nil
-}
-
-func (send MulticastSendCommand) Execute(args []string) error {
-	return sender.NewMultiCastSender(srvAddr).SendMulticast(send.Arg)
-}
-
-func (ignore IgnoreCommand) Execute(args []string) error {
-	ignore.Arg.Ignore = true
-	return diskstore.NewDiskPersistor().Save(ignore.Arg.Key(), ignore.Arg)
 }
 
 func fetchFailedBuildsRemotely(fly *commands.FlyCommand, target rc.Target) (map[string][]atc.Build, error) {
