@@ -35,6 +35,14 @@ func MsgHandler(src *net.UDPAddr, n int, b []byte) {
 		return
 	}
 
+	existingDevLookingIntoBuild := multicast.DevLookingIntoBuild{}
+	err = diskstore.NewDiskPersistor().ReadAndUnmarshal(devReq.Key(), &existingDevLookingIntoBuild)
+
+	if err == nil && existingDevLookingIntoBuild.CreatedAt.After(devReq.CreatedAt) {
+		logger.Debugf("Skipping %s due to existing record being newer", devReq)
+		return
+	}
+
 	logger.Debugf("Saving %s", devReq)
 	diskstore.NewDiskPersistor().Save(devReq.Key(), devReq)
 }

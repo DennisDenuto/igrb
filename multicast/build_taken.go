@@ -1,6 +1,9 @@
 package multicast
 
-import "strconv"
+import (
+	"strconv"
+	"time"
+)
 
 type DevLookingIntoBuild struct {
 	DevName      string `json:"name"`
@@ -8,6 +11,7 @@ type DevLookingIntoBuild struct {
 	JobName      string `json:"job_name"`
 	ID           int `json:"ID"`
 	Ignore       bool `json:"ignore"`
+	CreatedAt    time.Time`json:"created_at"`
 }
 
 func (devReq DevLookingIntoBuild) Key() string {

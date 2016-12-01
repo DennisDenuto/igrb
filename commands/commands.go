@@ -63,6 +63,7 @@ func (MulticastListenCommand) Execute(args []string) error {
 }
 
 func (send MulticastSendCommand) Execute(args []string) error {
+	send.Arg.CreatedAt = time.Now()
 	return sender.NewMultiCastSender(srvAddr).SendMulticast(send.Arg)
 }
 
