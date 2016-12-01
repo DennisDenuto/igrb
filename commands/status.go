@@ -74,7 +74,7 @@ func ListPipelines(all bool, target rc.Target) ([]atc.Pipeline, error) {
 	}
 }
 
-func FetchFailedBuilds(pipeline atc.Pipeline, target rc.Target, wg *sync.WaitGroup, failedBuilds map[string][]atc.Build) {
+func FetchFailedBuilds(pipeline atc.Pipeline, target rc.Target, wg *sync.WaitGroup, mapLock *sync.RWMutex, failedBuilds map[string][]atc.Build) {
 	defer wg.Done()
 
 	failedBuildsForPipeline, err := red.FailedBuildFetcher{Target: target}.Fetch(pipeline.Name)
@@ -82,5 +82,8 @@ func FetchFailedBuilds(pipeline atc.Pipeline, target rc.Target, wg *sync.WaitGro
 		fmt.Println(err)
 		return
 	}
+
+	mapLock.Lock()
 	failedBuilds[pipeline.Name] = failedBuildsForPipeline
+	mapLock.Unlock()
 }

@@ -123,6 +123,7 @@ Count = 50
 func fetchFailedBuildsRemotely(fly *commands.FlyCommand, target rc.Target) (map[string][]atc.Build, error) {
 	var failedBuilds map[string][]atc.Build = make(map[string][]atc.Build)
 
+	var mapLock sync.RWMutex
 	var wg sync.WaitGroup
 	var pipelines []atc.Pipeline
 	pipelines, err := ListPipelines(fly.Pipelines.All, target)
@@ -133,7 +134,7 @@ func fetchFailedBuildsRemotely(fly *commands.FlyCommand, target rc.Target) (map[
 
 	for _, pipeline := range pipelines {
 		wg.Add(1)
-		go FetchFailedBuilds(pipeline, target, &wg, failedBuilds)
+		go FetchFailedBuilds(pipeline, target, &wg, &mapLock, failedBuilds)
 	}
 	wg.Wait()
 
