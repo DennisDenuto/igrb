@@ -7,8 +7,8 @@ igrb auto discovers peers on the network using multicast.
 
 # Usage
 * Install go 1.7
-* Install bitbar (`brew install bitbar`)
-* Install igrb (`go install github.com/DennisDenuto/igrb`)
+* Install bitbar (`brew install Caskroom/cask/bitbar`)
+* Install igrb (`go get github.com/DennisDenuto/igrb`)
 * Add a script like the following to `~/.bitbar/igrb.10s.sh` and make it executable:
 
   ```sh
