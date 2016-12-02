@@ -2,11 +2,12 @@ package bitbar
 
 import (
 	"fmt"
-	"github.com/concourse/atc"
+	"strconv"
 	"time"
+
 	"github.com/DennisDenuto/igrb/data/diskstore"
 	"github.com/DennisDenuto/igrb/multicast"
-	"strconv"
+	"github.com/concourse/atc"
 	"github.com/git-duet/git-duet"
 )
 
@@ -21,8 +22,8 @@ func (p *Painter) AddMainMenuItems(item string) {
 func JobToString(targetUrl string, build atc.Build) string {
 	timeElapsed := time.Now().Sub(time.Unix(build.EndTime, 0))
 
-	commandToInvestigate := fmt.Sprintf("bash=/usr/local/bin/igrb param1=send param2=%s param3=%s param4=%s param5=%d terminal=false refresh=true", GetGitUser(), build.PipelineName, build.JobName, build.ID)
-	commandToIgnore := fmt.Sprintf("bash=/usr/local/bin/igrb param1=ignore param2=%s param3=%s param4=%s param5=%d terminal=false refresh=true", "_", build.PipelineName, build.JobName, build.ID)
+	commandToInvestigate := fmt.Sprintf("bash=/usr/local/bin/igrb param1=send param2=\"%s\" param3=\"%s\" param4=\"%s\" param5=\"%d\" terminal=false refresh=true", GetGitUser(), build.PipelineName, build.JobName, build.ID)
+	commandToIgnore := fmt.Sprintf("bash=/usr/local/bin/igrb param1=ignore param2=\"%s\" param3=\"%s\" param4=\"%s\" param5=\"%d\" terminal=false refresh=true", "_", build.PipelineName, build.JobName, build.ID)
 
 	var icon string = ":exclamation:"
 	buildTakenByDev := &multicast.DevLookingIntoBuild{}
@@ -35,7 +36,7 @@ func JobToString(targetUrl string, build atc.Build) string {
 %s %s/%s %s | href=%s
 --I got it! | %s
 --Ignore | %s
-Time red: %s`, icon, build.PipelineName, build.JobName, build.Status, targetUrl + build.URL, commandToInvestigate, commandToIgnore, timeElapsed)
+Time red: %s`, icon, build.PipelineName, build.JobName, build.Status, targetUrl+build.URL, commandToInvestigate, commandToIgnore, timeElapsed)
 
 	var buildFooter string
 
