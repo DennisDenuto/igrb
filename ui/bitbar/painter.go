@@ -66,7 +66,7 @@ func GetGitUser() string {
 	gitConfig := &duet.GitConfig{Namespace: "user", SetUserConfig: configuration.SetGitUserConfig}
 	gitDuetConfig := &duet.GitConfig{Namespace: configuration.Namespace, SetUserConfig: configuration.SetGitUserConfig}
 	pair1, err := gitDuetConfig.GetAuthor()
-	if err == nil {
+	if err == nil && pair1 != nil {
 		pair2, err := gitDuetConfig.GetCommitters()
 		if err == nil && len(pair2) > 0 {
 			return pair1.Name + " & " + getCommitterNames(pair2)
