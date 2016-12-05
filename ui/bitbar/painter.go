@@ -9,6 +9,7 @@ import (
 	"github.com/DennisDenuto/igrb/multicast"
 	"github.com/concourse/atc"
 	"github.com/git-duet/git-duet"
+	"strings"
 )
 
 type Painter struct {
@@ -36,7 +37,7 @@ func JobToString(targetUrl string, build atc.Build) string {
 %s %s/%s %s | href=%s
 --I got it! | %s
 --Ignore | %s
-Time red: %s`, icon, build.PipelineName, build.JobName, build.Status, targetUrl+build.URL, commandToInvestigate, commandToIgnore, timeElapsed)
+Time red: %s`, icon, build.PipelineName, build.JobName, build.Status, targetUrl + build.URL, commandToInvestigate, commandToIgnore, timeElapsed)
 
 	var buildFooter string
 
@@ -64,10 +65,25 @@ func GetGitUser() string {
 
 	gitConfig := &duet.GitConfig{Namespace: "user", SetUserConfig: configuration.SetGitUserConfig}
 	gitDuetConfig := &duet.GitConfig{Namespace: configuration.Namespace, SetUserConfig: configuration.SetGitUserConfig}
-	pair, err := gitDuetConfig.GetAuthor()
-	if err != nil {
-		return pair.Name
+	pair1, err := gitDuetConfig.GetAuthor()
+	if err == nil {
+		pair2, err := gitDuetConfig.GetCommitters()
+		if err == nil && len(pair2) > 0 {
+			return pair1.Name + " & " + getCommitterNames(pair2)
+		}
+		return pair1.Name
 	}
 	name, err := gitConfig.GetKey("name")
 	return name
 }
+
+func getCommitterNames(pairs []*duet.Pair) string {
+	var names []string
+
+	for _, value := range pairs {
+		names = append(names, value.Name)
+	}
+
+	return strings.Join(names, "&")
+}
+
