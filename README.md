@@ -11,7 +11,7 @@ igrb auto discovers peers on the network using multicast.
 * Install igrb (`go get github.com/DennisDenuto/igrb`)
 * Add a script like the following to `~/.bitbar/igrb.10s.sh` and make it executable:
 
-  ```sh
+```sh
 #!/bin/bash
 CONCOURSE_TARGET=<your concourse target>
 
@@ -19,7 +19,7 @@ if ! pgrep -qf "listen $CONCOURSE_TARGET"; then
   nohup /usr/local/bin/igrb listen $CONCOURSE_TARGET &
 fi
 /usr/local/bin/igrb status $CONCOURSE_TARGET
-  ```
+```
 
   
 # Configure the refresh time
